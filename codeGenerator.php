@@ -7,11 +7,16 @@
 // Vérification que les chiffres ne se suivent pas.
 // 	En progression
 // 	En regréssion
-
-class SecurityNumberChecker
+interface SecurityNumberCInterface
 {
 	public const MAX_DIGITS_NUMBER = 6;
-	public const MAX_RECPLICATION_NUMBER = 3;
+	public const MAX_REPLICATION_NUMBER = 1;
+
+	public function generate(): string;
+}
+
+class WalkAndRegenerate implements SecurityNumberCInterface
+{
 
 	public function algoPresentation()
 	{
@@ -26,17 +31,29 @@ class SecurityNumberChecker
 	public function suggestMeACode(): string
 	{
 		return mt_rand(100000, 999999);
+		//return '122256';
 	}
 
 	/**
 	 * Check and validate the dupplication is aggreed according constante.
 	 */
-	public function checkDuplicationNumbers(string $proposal):string
+	public function hasDupplicateNumbers(string $code)
 	{
-		return $proposal;
+		$numbersCounters = @$this->organiseNumberByValue($code);
+		foreach($numbersCounters as $key => $counter) {
+			if (SecurityNumberCInterface::MAX_REPLICATION_NUMBER < $counter) {
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
-	public function checkSuiteNumbers(string $proposal)
+	/**
+	 * Check if not number logic suite
+	 */
+	public function hasSuiteNumbers(string $proposal)
 	{
 		return $proposal;
 	}
@@ -46,29 +63,51 @@ class SecurityNumberChecker
 		return 'quality report wip';
 	}
 
-	public function walkAccrossCode()
+	/**
+	 * Walk accross a numbers suite
+	 */
+	public function organiseNumberByValue(string $numbers): array
 	{
+		$organizedNumbers = [];
+		foreach(str_split($numbers) as $key => $number)
+		{
+			$organizedNumbers[$number] = $organizedNumbers[$number ?? 'toi'] + 1;
+		}
 
+		return $organizedNumbers;
 	}
 
 	public function displayCode(string $code): string
 	{
-		echo "--------- {$code} --------";
+		echo "\n --------- $code --------\n ";
 		return $code;
 	}
 
-	public function generateSecurityCode()
+	/**
+	 * Main function who aggregate all method for code management
+	 */
+	public function generate(): string
 	{
 		$this->algoPresentation();
-		$proposal = $this->suggestMeACode(); // wip
-		$proposal = $this->checkSuiteNumbers($proposal); // wip 
-		$proposal = $this->checkDuplicationNumbers($proposal); // wip 
-		
+		$proposal = $this->prepareValidcode();
+		// todo Make the numbers suite check function. There is a problem if proposal is invalid, how regenerate ?
+
+
+		return $proposal;
+	}
+
+	public function prepareValidcode()
+	{
+		$proposal = $this->suggestMeACode();
+		$isInvalidProposal = $this->hasDupplicateNumbers($proposal); // wip 
+		if ($isInvalidProposal) {
+			$proposal = $this->prepareValidcode();
+		}
+
 		return $proposal;
 	}
 }
 
-$securityInstance = new SecurityNumberChecker();
-$securityInstance->displayCode($securityInstance->generateSecurityCode());
-
-
+$securityInstance = new WalkAndRegenerate();
+$code = $securityInstance->prepareValidcode();
+$securityInstance->displayCode($code);
