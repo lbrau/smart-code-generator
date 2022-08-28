@@ -1,17 +1,12 @@
 <?php
-
-// Parcours une liste de chiffre entre 1 et 9
-// Compte le nombre de fois que les chiffres sont publiés dans l'algo.
-// si on un des nombre est publié + de 3 fois, on régénère le code.
-// Vérification que les chiffres ne se suivent pas.
-// 	En progression
-// 	En regréssion
 interface SecurityNumberCInterface
 {
 	public const MAX_DIGITS_NUMBER = 6;
 	public const MAX_REPLICATION_NUMBER = 2;
+	public const MAX_NUMBER_LOGIC_SUITE = 3;
 
 	public function generate(): string;
+	public function log();
 }
 
 class WalkAndRegenerate implements SecurityNumberCInterface
@@ -58,9 +53,32 @@ class WalkAndRegenerate implements SecurityNumberCInterface
 	 */
 	public function hasSuiteNumbers(string $proposal): bool
 	{
-		// i want walk accross code string
-		// i check if next current exists
-		// i check if current item is suite of next current
+		$numbers = str_split($proposal);
+		$addLogicCounter = 1;
+		$minusLogicCounter = 1;
+		for($i = 0; $i < count($numbers); ++$i) {
+			if (!isset($numbers[$i+1])) {
+				break;
+			}
+
+			$currentNumber = (int)$numbers[$i];
+			$nextNumber = (int)$numbers[$i+1];
+			$logicSymbol = null;
+			if ($nextNumber === $currentNumber+1) {
+				$logicSymbol = '+';
+				$addLogicCounter++;
+			} else if ($nextNumber === $currentNumber-1) {
+				$logicSymbol = '-';
+				$minusLogicCounter++;
+			}
+		}
+
+		if (
+				SecurityNumberCInterface::MAX_NUMBER_LOGIC_SUITE <= $addLogicCounter
+				|| SecurityNumberCInterface::MAX_NUMBER_LOGIC_SUITE <= $minusLogicCounter 
+			) {
+				return true;
+		}
 
 		return false;
 	}
@@ -107,6 +125,11 @@ class WalkAndRegenerate implements SecurityNumberCInterface
 		return $proposal;
 	}
 
+	public function log()
+	{
+		// todo project logger injection
+	}
+
 	/**
 	 * Main function who aggregate all method for code management
 	 */
@@ -116,10 +139,9 @@ class WalkAndRegenerate implements SecurityNumberCInterface
 		try {
 			$proposal = $this->prepareValidcode();
 		} catch (\Exception $e) {
-			// log from interface contract
+			$this->log();
 			echo sprintf("L'application a rencontré un problème : %s", $e->getMessage());
 		}
-		// todo Make the numbers suite check function. There is a problem if proposal is invalid, how regenerate ?
 
 		return $proposal;
 	}
