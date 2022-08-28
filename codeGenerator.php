@@ -10,7 +10,7 @@
 interface SecurityNumberCInterface
 {
 	public const MAX_DIGITS_NUMBER = 6;
-	public const MAX_REPLICATION_NUMBER = 3;
+	public const MAX_REPLICATION_NUMBER = 5;
 
 	public function generate(): string;
 }
@@ -29,8 +29,8 @@ class WalkAndRegenerate implements SecurityNumberCInterface
 	public function suggestMeACode(): string
 	{
 		return mt_rand(
-				1*10**(SecurityNumberCInterface::MAX_DIGITS_NUMBER-1),
-			 	9*10**(SecurityNumberCInterface::MAX_DIGITS_NUMBER-1)
+			1*10**(SecurityNumberCInterface::MAX_DIGITS_NUMBER-1),
+		 	9*10**(SecurityNumberCInterface::MAX_DIGITS_NUMBER-1)
 		);
 	}
 
@@ -59,12 +59,10 @@ class WalkAndRegenerate implements SecurityNumberCInterface
 		// i check if next current exists
 		// i check if current item is suite of next current
 
-
-
 		return false;
 	}
 
-	public function getCodeQualityReport()
+	public function getCodeQualityReport(): string
 	{
 		return 'quality report wip';
 	}
@@ -77,7 +75,7 @@ class WalkAndRegenerate implements SecurityNumberCInterface
 		$organizedNumbers = [];
 		foreach(str_split($numbers) as $key => $number)
 		{
-			$organizedNumbers[$number] = $organizedNumbers[$number ?? 'toi'] + 1;
+			$organizedNumbers[$number]++;
 		}
 
 		return $organizedNumbers;
@@ -86,7 +84,7 @@ class WalkAndRegenerate implements SecurityNumberCInterface
 	public function displayCode(string $code): string
 	{
 		echo "\n --------- $code --------\n ";
-		
+
 		return $code;
 	}
 
