@@ -112,13 +112,10 @@ class WalkAndRegenerate implements SecurityNumberCInterface
 	public function prepareValidcode(): string
 	{
 		$proposal = $this->suggestMeACode();
-		$isInvalidProposal = $this->hasDupplicateNumbers($proposal); // wip 
-		if ($isInvalidProposal) {
-			$proposal = $this->prepareValidcode();
-		}
+		$isReplicationDetected = $this->hasDupplicateNumbers($proposal);
+		$isLogicSuiteDetected = $this->hasSuiteNumbers($proposal);
 
-		$isInvalidProposal =  $this->hasSuiteNumbers($proposal);
-		if ($isInvalidProposal) {
+		if ($isReplicationDetected || $isLogicSuiteDetected) {
 			$proposal = $this->prepareValidcode();
 		}
 
