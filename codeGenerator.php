@@ -1,6 +1,5 @@
 <?php
 
-
 // Parcours une liste de chiffre entre 1 et 9
 // Compte le nombre de fois que les chiffres sont publiés dans l'algo.
 // si on un des nombre est publié + de 3 fois, on régénère le code.
@@ -10,7 +9,7 @@
 interface SecurityNumberCInterface
 {
 	public const MAX_DIGITS_NUMBER = 6;
-	public const MAX_REPLICATION_NUMBER = 5;
+	public const MAX_REPLICATION_NUMBER = 2;
 
 	public function generate(): string;
 }
@@ -28,6 +27,10 @@ class WalkAndRegenerate implements SecurityNumberCInterface
 
 	public function suggestMeACode(): string
 	{
+		if (is_float(1*10**(SecurityNumberCInterface::MAX_DIGITS_NUMBER-1))) {
+			throw new \Exception('Maximum digits was reached, you must decrease the MAX_DIGITS_NUMBER value');
+		}
+
 		return mt_rand(
 			1*10**(SecurityNumberCInterface::MAX_DIGITS_NUMBER-1),
 		 	9*10**(SecurityNumberCInterface::MAX_DIGITS_NUMBER-1)
@@ -110,7 +113,12 @@ class WalkAndRegenerate implements SecurityNumberCInterface
 	public function generate(): string
 	{
 		$this->algoPresentation();
-		$proposal = $this->prepareValidcode();
+		try {
+			$proposal = $this->prepareValidcode();
+		} catch (\Exception $e) {
+			// log from interface contract
+			echo sprintf("L'application a rencontré un problème : %s", $e->getMessage());
+		}
 		// todo Make the numbers suite check function. There is a problem if proposal is invalid, how regenerate ?
 
 		return $proposal;
