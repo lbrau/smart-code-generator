@@ -10,34 +10,34 @@
 interface SecurityNumberCInterface
 {
 	public const MAX_DIGITS_NUMBER = 6;
-	public const MAX_REPLICATION_NUMBER = 1;
+	public const MAX_REPLICATION_NUMBER = 3;
 
 	public function generate(): string;
 }
 
 class WalkAndRegenerate implements SecurityNumberCInterface
 {
-
 	public function algoPresentation()
 	{
 		echo "#######################################\n ";
 		echo "          Demarrage du script          \n ";
-		echo "             de génération            \n ";
-		echo "                de code 			 \n ";
+		echo "             de génération             \n ";
+		echo "                de code 			     \n ";
 		echo "#######################################\n ";
-
 	}
 
 	public function suggestMeACode(): string
 	{
-		return mt_rand(100000, 999999);
-		//return '122256';
+		return mt_rand(
+				1*10**(SecurityNumberCInterface::MAX_DIGITS_NUMBER-1),
+			 	9*10**(SecurityNumberCInterface::MAX_DIGITS_NUMBER-1)
+		);
 	}
 
 	/**
 	 * Check and validate the dupplication is aggreed according constante.
 	 */
-	public function hasDupplicateNumbers(string $code)
+	public function hasDupplicateNumbers(string $code): bool
 	{
 		$numbersCounters = @$this->organiseNumberByValue($code);
 		foreach($numbersCounters as $key => $counter) {
@@ -53,9 +53,15 @@ class WalkAndRegenerate implements SecurityNumberCInterface
 	/**
 	 * Check if not number logic suite
 	 */
-	public function hasSuiteNumbers(string $proposal)
+	public function hasSuiteNumbers(string $proposal): bool
 	{
-		return $proposal;
+		// i want walk accross code string
+		// i check if next current exists
+		// i check if current item is suite of next current
+
+
+
+		return false;
 	}
 
 	public function getCodeQualityReport()
@@ -80,7 +86,24 @@ class WalkAndRegenerate implements SecurityNumberCInterface
 	public function displayCode(string $code): string
 	{
 		echo "\n --------- $code --------\n ";
+		
 		return $code;
+	}
+
+	public function prepareValidcode(): string
+	{
+		$proposal = $this->suggestMeACode();
+		$isInvalidProposal = $this->hasDupplicateNumbers($proposal); // wip 
+		if ($isInvalidProposal) {
+			$proposal = $this->prepareValidcode();
+		}
+
+		$isInvalidProposal =  $this->hasSuiteNumbers($proposal);
+		if ($isInvalidProposal) {
+			$proposal = $this->prepareValidcode();
+		}
+
+		return $proposal;
 	}
 
 	/**
@@ -92,22 +115,11 @@ class WalkAndRegenerate implements SecurityNumberCInterface
 		$proposal = $this->prepareValidcode();
 		// todo Make the numbers suite check function. There is a problem if proposal is invalid, how regenerate ?
 
-
-		return $proposal;
-	}
-
-	public function prepareValidcode()
-	{
-		$proposal = $this->suggestMeACode();
-		$isInvalidProposal = $this->hasDupplicateNumbers($proposal); // wip 
-		if ($isInvalidProposal) {
-			$proposal = $this->prepareValidcode();
-		}
-
 		return $proposal;
 	}
 }
 
 $securityInstance = new WalkAndRegenerate();
 $code = $securityInstance->prepareValidcode();
+
 $securityInstance->displayCode($code);
